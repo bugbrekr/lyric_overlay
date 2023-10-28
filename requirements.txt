@@ -1,0 +1,4 @@
+toml
+pynput
+spotipy
+lyricsgenius
