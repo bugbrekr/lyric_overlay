@@ -18,6 +18,8 @@ ExecStart={CWD}/.venv/bin/python3 main.py
 Restart=always
 RestartSec=3
 
+Environment="DISPLAY=:0"
+
 [Install]
 WantedBy=multi-user.target
 """
