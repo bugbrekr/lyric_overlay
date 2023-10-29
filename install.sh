@@ -11,7 +11,7 @@ echo "Running setup script..."
 .venv/bin/python3 setup.py
 
 echo "Installing service..."
-sudo mv .unit_service /etc/systemd/system/lyric-overlay.service
-sudo systemctl daemon-reload
-sudo systemctl enable lyric-overlay.service
-sudo systemctl start lyric-overlay.service 
+mv .unit_service ~/.config/systemd/user/lyric-overlay.service
+systemctl --user daemon-reload
+systemctl --user enable lyric-overlay.service
+systemctl --user start lyric-overlay.service 

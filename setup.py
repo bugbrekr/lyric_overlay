@@ -7,21 +7,17 @@ import pwd
 
 CWD = os.getcwd()
 
-unit_service = f"""
-[Unit]
+unit_service = f"""[Unit]
 Description=LyricOverlay
 
 [Service]
-User={pwd.getpwuid(os.getuid()).pw_name}
 WorkingDirectory={CWD}/
 ExecStart={CWD}/.venv/bin/python3 main.py
 Restart=always
 RestartSec=3
 
-Environment="DISPLAY=:0"
-
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target
 """
 
 with open("config.toml.sample") as f:
