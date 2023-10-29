@@ -1,5 +1,5 @@
 import toml
-import spotipy
+# import spotipy
 # from spotipy.oauth2 import SpotifyOAuth, CacheFileHandler
 from lyricsgenius import Genius
 import os
