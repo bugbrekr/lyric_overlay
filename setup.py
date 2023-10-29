@@ -52,19 +52,20 @@ def take_input(text):
 #     print(f"Listening to {current_track['item']['name']} by {current_track['item']['artists'][0]['name']}")
 # print()
 
-genius_api_token = take_input("Please enter your Genius API token.")
-genius = Genius(config['api']['genius_api_token'])
-genius.verbose = False
-genius.search_song("Boulevard of Broken Dreams", "Green Day")
-print("Genius API functioning.\n")
+if config['api'].get("genius_api_token") == None:
+    genius_api_token = take_input("Please enter your Genius API token.")
+    genius = Genius(config['api']['genius_api_token'])
+    genius.verbose = False
+    genius.search_song("Boulevard of Broken Dreams", "Green Day")
+    print("Genius API functioning.\n")
 
-print("Saving configuration file config.toml...")
-# config['api']['spotify_client_id'] = spotify_client_id
-# config['api']['spotify_client_secret'] = spotify_client_secret
-config['api']['genius_api_token'] = genius_api_token
+    print("Saving configuration file config.toml...")
+    # config['api']['spotify_client_id'] = spotify_client_id
+    # config['api']['spotify_client_secret'] = spotify_client_secret
+    config['api']['genius_api_token'] = genius_api_token
 
-with open("config.toml", "w") as f:
-    f.write(toml.dumps(config))
+    with open("config.toml", "w") as f:
+        f.write(toml.dumps(config))
 
 with open(".unit_service", "w") as f:
     f.write(unit_service)

@@ -145,7 +145,7 @@ class Window:
             self._set_window_text("No track playing.")
             return
         track_title, track_artist = track
-        if time.time()-self.last_api_hit < 2:
+        if time.time()-self.last_api_hit < 1:
             self._set_window_text("Slow down! Try again in a second.")
             return
         self._set_window_text("Fetching lyrics...")
