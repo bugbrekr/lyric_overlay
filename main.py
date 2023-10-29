@@ -9,7 +9,9 @@ import time
 # import spotipy
 # from spotipy.oauth2 import SpotifyOAuth, CacheFileHandler
 from lyricsgenius import Genius
+import hashlib
 import dbus
+import os
 
 mouse = Controller()
 
@@ -72,6 +74,22 @@ def get_current_track():
                 metadata = player.Get('org.mpris.MediaPlayer2.Player', 'Metadata', dbus_interface='org.freedesktop.DBus.Properties')
                 return (metadata['xesam:title'], metadata['xesam:artist'][0])
 
+def fetch_lyrics(track_title, track_artist):
+    song_hash = hashlib.md5((track_title+track_artist).encode()).hexdigest()
+    if os.path.isfile(f".cache/{song_hash}.txt"):
+        with open(f".cache/{song_hash}.txt") as f:
+            lyrics = f.read()
+        return lyrics, True
+    song = genius.search_song(track_title, track_artist)
+    if song == None:
+        return None, False
+    lyrics = f"[{track_title} - {track_artist}]\n\n"+"\n".join(song.lyrics.split("\n")[1:])
+    if os.path.isdir(".cache/") == False:
+        os.mkdir(".cache/")
+    with open(f".cache/{song_hash}.txt", "w") as f:
+        f.write(lyrics)
+    return lyrics, True
+
 class Window:
     def __init__(self, root):
         self.window = tk.Toplevel(root)
@@ -131,14 +149,13 @@ class Window:
             self._set_window_text("Slow down! Try again in a second.")
             return
         self._set_window_text("Fetching lyrics...")
-        song = genius.search_song(track_title, track_artist)
+        
+        lyrics, res = fetch_lyrics(track_title, track_artist)
         self.last_api_hit = time.time()
-        if song == None:
+        if res == False:
             self._set_window_text("Sorry, lyrics not found.")
             return
-        lyrics = "\n".join(song.lyrics.split("\n")[1:])
-        window_text = f"[{song.full_title}]\n"+lyrics
-        self._set_window_text(window_text)
+        self._set_window_text(lyrics)
     def update_window(self):
         threading.Thread(target=self._update_window).start()
     def on_hotkey(self):
