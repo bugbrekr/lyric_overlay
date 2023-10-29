@@ -4,6 +4,9 @@ Any song. Anytime. Anywhere.
 
 Built for Linux. Tested on Ubuntu (Xfce).
 
+![vlc_demo](images/vlc_demo.png) 
+![spotify_demo](images/spotify_demo.png)
+
 ### Technologies Used
  - **Genius**: Web API for fetching lyrics for almost any song.
  - **DBus**: Library to track currently playing music.
