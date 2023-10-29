@@ -7,3 +7,7 @@ Any song. Anytime. Anywhere.
  - **Genius**: Web API for fetching lyrics for almost any song.
  - **DBus**: Library to track currently playing music.
  - **Tkinter**: A good GUI framework.
+
+## Installation
+`wget -qO- https://git.bugbrekr.dev/bugbrekr/lyric_overlay/archive/v1.6.tar.gz | tar xvz && cd lyric_overlay/ && ./install.sh
+`
