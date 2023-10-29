@@ -6,26 +6,29 @@ import random, string
 from pynput import keyboard
 from pynput.mouse import Controller
 import time
-import spotipy
-from spotipy.oauth2 import SpotifyOAuth, CacheFileHandler
+# import spotipy
+# from spotipy.oauth2 import SpotifyOAuth, CacheFileHandler
 from lyricsgenius import Genius
+import dbus
 
 mouse = Controller()
 
 with open("config.toml") as f:
     config = toml.loads(f.read())
 
-sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
-    client_id=config['api']['spotify_client_id'],
-    client_secret=config['api']['spotify_client_secret'],
-    redirect_uri=config['api']['spotify_redirect_uri'],
-    scope="user-read-currently-playing",
-    cache_handler=CacheFileHandler(cache_path=".spotify_token")))
+# sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
+#     client_id=config['api']['spotify_client_id'],
+#     client_secret=config['api']['spotify_client_secret'],
+#     redirect_uri=config['api']['spotify_redirect_uri'],
+#     scope="user-read-currently-playing",
+#     cache_handler=CacheFileHandler(cache_path=".spotify_token")))
 genius = Genius(config['api']['genius_api_token'])
 genius.verbose = False
 
-user = sp.current_user()
-USER_NAME = user['display_name']
+bus = dbus.SessionBus()
+
+# user = sp.current_user()
+# USER_NAME = user['display_name']
 
 root = tk.Tk()
 root.withdraw()
@@ -58,6 +61,16 @@ style.layout('arrowless.Vertical.TScrollbar',
            {'children': [('Vertical.Scrollbar.thumb', 
                           {'expand': '1', 'sticky': 'ns'})],
             'sticky': 'ns'})])
+
+def get_current_track():
+    for service in bus.list_names():
+        if service.startswith('org.mpris.MediaPlayer2.'):
+            player = dbus.SessionBus().get_object(service, '/org/mpris/MediaPlayer2')
+
+            status=player.Get('org.mpris.MediaPlayer2.Player', 'PlaybackStatus', dbus_interface='org.freedesktop.DBus.Properties')
+            if status == "Playing":
+                metadata = player.Get('org.mpris.MediaPlayer2.Player', 'Metadata', dbus_interface='org.freedesktop.DBus.Properties')
+                return (metadata['xesam:title'], metadata['xesam:artist'][0])
 
 class Window:
     def __init__(self, root):
@@ -103,16 +116,23 @@ class Window:
         self.window.withdraw()
         self.is_shown = False
     def _update_window(self):
+        # current_track = sp.current_user_playing_track()
+        # track_title = current_track['item']['name']
+        # track_artist = current_track['item']['artists'][0]['name']
+        # if current_track == None:
+        #     self._set_window_text("No track playing.")
+        #     return
+        track = get_current_track()
+        if track == None:
+            self._set_window_text("No track playing.")
+            return
+        track_title, track_artist = track
         if time.time()-self.last_api_hit < 2:
             self._set_window_text("Slow down! Try again in a second.")
             return
-        current_track = sp.current_user_playing_track()
-        self.last_api_hit = time.time()
-        if current_track == None:
-            self._set_window_text("No track playing.")
-            return
         self._set_window_text("Fetching lyrics...")
-        song = genius.search_song(current_track['item']['name'], current_track['item']['artists'][0]['name'])
+        song = genius.search_song(track_title, track_artist)
+        self.last_api_hit = time.time()
         if song == None:
             self._set_window_text("Sorry, lyrics not found.")
             return

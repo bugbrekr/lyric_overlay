@@ -19,8 +19,8 @@ text = "white"
 show_hide = "<ctrl>+<alt>+k" # use <cmd> for 'super' or windows key
 
 [api]
-spotify_client_id = "00000000000000000000000000000000"
-spotify_client_secret = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-spotify_redirect_uri = "http://localhost:50891/authorize" # leave unchanged unless needed
+# spotify_client_id = "00000000000000000000000000000000"
+# spotify_client_secret = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+# spotify_redirect_uri = "http://localhost:50891/authorize" # leave unchanged unless needed
 
 genius_api_token = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"

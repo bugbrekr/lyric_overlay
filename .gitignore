@@ -1,2 +1,3 @@
 .spotify_token
 config.toml
+.venv/

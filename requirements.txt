@@ -1,4 +1,5 @@
 toml
 pynput
-spotipy
+# spotipy
 lyricsgenius
+dbus-python
