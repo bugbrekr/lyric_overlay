@@ -1,4 +1,4 @@
-# lyric_overlay
+# Lyric Overlay
 
 Display lyrics for the song you're listening with the press of a button.
 Any song. Anytime. Anywhere.
