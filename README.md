@@ -9,5 +9,10 @@ Any song. Anytime. Anywhere.
  - **Tkinter**: A good GUI framework.
 
 ## Installation
-`wget -qO- https://git.bugbrekr.dev/bugbrekr/lyric_overlay/archive/v1.6.tar.gz | tar xvz && cd lyric_overlay/ && ./install.sh
-`
+```
+$ wget -qO- https://git.bugbrekr.dev/bugbrekr/lyric_overlay/archive/v1.6.tar.gz | tar xvz
+$ cd lyric_overlay/ 
+$ ./install.sh
+```
+OR
+`$ wget -qO- https://git.bugbrekr.dev/bugbrekr/lyric_overlay/archive/v1.6.tar.gz | tar xvz && cd lyric_overlay/ && ./install.sh`
