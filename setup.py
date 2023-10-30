@@ -1,8 +1,9 @@
 import toml
 # import spotipy
 # from spotipy.oauth2 import SpotifyOAuth, CacheFileHandler
-from lyricsgenius import Genius
+# from lyricsgenius import Genius
 import os
+import secrets
 import pwd
 
 CWD = os.getcwd()
@@ -22,8 +23,6 @@ WantedBy=default.target
 
 with open("config.toml.sample") as f:
     config = toml.loads(f.read())
-
-print("\nWelcome to [LyricOverlay] installer!\n")
 
 def take_input(text):
     return input(text+"\n> ")
@@ -52,22 +51,20 @@ def take_input(text):
 #     print(f"Listening to {current_track['item']['name']} by {current_track['item']['artists'][0]['name']}")
 # print()
 
-if config['api'].get("genius_api_token") == None:
-    genius_api_token = take_input("Please enter your Genius API token.")
-    genius = Genius(config['api']['genius_api_token'])
-    genius.verbose = False
-    genius.search_song("Boulevard of Broken Dreams", "Green Day")
-    print("Genius API functioning.\n")
+# if config['api'].get("genius_api_token") == "XXXXX":
+#     genius_api_token = take_input("Please enter your Genius API token.")
+#     genius = Genius(config['api']['genius_api_token'])
+#     genius.verbose = False
+#     genius.search_song("Boulevard of Broken Dreams", "Green Day")
+#     print("Genius API functioning.\n")
 
-    print("Saving configuration file config.toml...")
-    # config['api']['spotify_client_id'] = spotify_client_id
-    # config['api']['spotify_client_secret'] = spotify_client_secret
-    config['api']['genius_api_token'] = genius_api_token
+#     print("Saving configuration file config.toml...")
+#     # config['api']['spotify_client_id'] = spotify_client_id
+#     # config['api']['spotify_client_secret'] = spotify_client_secret
+config['api']['genius_api_token'] = secrets.token_hex(16)
 
-    with open("config.toml", "w") as f:
-        f.write(toml.dumps(config))
+with open("config.toml", "w") as f:
+    f.write(toml.dumps(config))
 
 with open(".unit_service", "w") as f:
     f.write(unit_service)
-
-print("Setup complete.")

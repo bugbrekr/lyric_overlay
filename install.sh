@@ -1,3 +1,5 @@
+printf "\nWelcome to [LyricOverlay] installer!\n\n"
+
 echo "Creating virtual environment..."
 python3 -m venv .venv
 
