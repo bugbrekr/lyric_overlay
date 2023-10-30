@@ -15,3 +15,6 @@ text = "white"
 
 [keybinds]
 show_hide = "<ctrl>+<alt>+k" # use <cmd> for 'super' or windows key
+
+[api]
+genius_api_token = "XXXXX"
