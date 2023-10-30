@@ -22,13 +22,13 @@ Please check the [compatibility](#compatibility) of your system before installin
 Obtain an API token from Genius at their [API Client management Page](https://genius.com/api-clients).
 ### Linux (Debian based)
 ```
-$ wget -qO- https://git.bugbrekr.dev/bugbrekr/lyric_overlay/archive/v1.7.tar.gz | tar xvz
+$ wget -qO- https://git.bugbrekr.dev/bugbrekr/lyric_overlay/archive/v1.8.tar.gz | tar xvz
 $ cd lyric_overlay/ 
 $ ./install.sh
 ```
 OR
 ```
-$ wget -qO- https://git.bugbrekr.dev/bugbrekr/lyric_overlay/archive/v1.7.tar.gz | tar xvz && cd lyric_overlay/ && ./install.sh
+$ wget -qO- https://git.bugbrekr.dev/bugbrekr/lyric_overlay/archive/v1.8.tar.gz | tar xvz && cd lyric_overlay/ && ./install.sh
 ```
 
 This will setup the configuration file with default settings and will install a systemd unit-service to run on startup.
