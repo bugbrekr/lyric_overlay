@@ -15,7 +15,10 @@ import os
 
 mouse = Controller()
 
-with open("config.toml") as f:
+CONFIG_FILE_LOCATION = os.path.expanduser("~/.config/lyric_overlay.toml")
+CACHE_FOLDER_LOCATION = os.path.expanduser("~/.cache/lyric_overlay/")
+
+with open(os.path.expanduser("~/.config/lyric_overlay.toml")) as f:
     config = toml.loads(f.read())
 
 # sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
@@ -76,17 +79,17 @@ def get_current_track():
 
 def fetch_lyrics(track_title, track_artist):
     song_hash = hashlib.md5((track_title+track_artist).encode()).hexdigest()
-    if os.path.isfile(f".cache/{song_hash}.txt"):
-        with open(f".cache/{song_hash}.txt") as f:
+    if os.path.isfile(CACHE_FOLDER_LOCATION+song_hash+".txt"):
+        with open(CACHE_FOLDER_LOCATION+song_hash+".txt") as f:
             lyrics = f.read()
         return lyrics, True
     song = genius.search_song(track_title, track_artist)
     if song == None:
         return None, False
     lyrics = f"[{track_title} - {track_artist}]\n\n"+"\n".join(song.lyrics.split("\n")[1:])
-    if os.path.isdir(".cache/") == False:
-        os.mkdir(".cache/")
-    with open(f".cache/{song_hash}.txt", "w") as f:
+    if os.path.isdir(CACHE_FOLDER_LOCATION) == False:
+        os.mkdir(CACHE_FOLDER_LOCATION)
+    with open(CACHE_FOLDER_LOCATION+song_hash+".txt", "w") as f:
         f.write(lyrics)
     return lyrics, True
 
