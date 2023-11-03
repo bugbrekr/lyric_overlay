@@ -1,9 +1,6 @@
-"""Utility functions for `syncedlyrics` package"""
-
 from bs4 import BeautifulSoup, FeatureNotFound
 
 def is_lrc_valid(lrc: str, allow_plain_format: bool = False) -> bool:
-    """Checks whether a given LRC string is valid or not."""
     if not lrc:
         return False
     if not allow_plain_format:
@@ -12,9 +9,6 @@ def is_lrc_valid(lrc: str, allow_plain_format: bool = False) -> bool:
     return True
 
 def generate_bs4_soup(session, url: str, **kwargs):
-    """Returns a `BeautifulSoup` from the given `url`.
-    Tries to use `lxml` as the parser if available, otherwise `html.parser`
-    """
     r = session.get(url)
     try:
         soup = BeautifulSoup(r.text, features="lxml", **kwargs)

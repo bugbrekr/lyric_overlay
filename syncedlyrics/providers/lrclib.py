@@ -1,5 +1,3 @@
-"""Lrclib (lrclib.net) LRC provider"""
-
 from typing import Optional
 from .base import LRCProvider
 

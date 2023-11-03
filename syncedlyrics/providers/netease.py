@@ -1,5 +1,3 @@
-"""NetEase (music.163.com) china-based provider"""
-
 from typing import Optional
 from .base import LRCProvider
 
