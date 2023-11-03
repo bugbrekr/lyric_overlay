@@ -5,12 +5,9 @@ import toml
 from pynput import keyboard
 from pynput.mouse import Controller
 import time
-from lyricsgenius import Genius
-import hashlib
-import dbus
+import requests
 import os
-
-mouse = Controller()
+import functions
 
 CONFIG_FILE_LOCATION = os.path.expanduser("~/.config/lyric_overlay.toml")
 CACHE_FOLDER_LOCATION = os.path.expanduser("~/.cache/lyric_overlay/")
@@ -18,10 +15,10 @@ CACHE_FOLDER_LOCATION = os.path.expanduser("~/.cache/lyric_overlay/")
 with open(os.path.expanduser("~/.config/lyric_overlay.toml")) as f:
     config = toml.loads(f.read())
 
-genius = Genius(config['api']['genius_api_token'])
-genius.verbose = False
+mouse = Controller()
 
-bus = dbus.SessionBus()
+lyrics_fetcher = functions.LyricsFetcher(config['api']['genius_api_token'], CACHE_FOLDER_LOCATION+"/lyrics/")
+player = functions.Player()
 
 root = tk.Tk()
 root.withdraw()
@@ -55,33 +52,6 @@ style.layout('arrowless.Vertical.TScrollbar',
                           {'expand': '1', 'sticky': 'ns'})],
             'sticky': 'ns'})])
 
-def get_current_track():
-    for service in bus.list_names():
-        if service.startswith('org.mpris.MediaPlayer2.'):
-            player = dbus.SessionBus().get_object(service, '/org/mpris/MediaPlayer2')
-
-            status=player.Get('org.mpris.MediaPlayer2.Player', 'PlaybackStatus', dbus_interface='org.freedesktop.DBus.Properties')
-            if status == "Playing":
-                metadata = player.Get('org.mpris.MediaPlayer2.Player', 'Metadata', dbus_interface='org.freedesktop.DBus.Properties')
-                print(int(player.Get('org.mpris.MediaPlayer2.Player', 'Position', dbus_interface='org.freedesktop.DBus.Properties'))/10e5)
-                return (metadata['xesam:title'], metadata['xesam:artist'][0])
-
-def fetch_lyrics(track_title, track_artist):
-    song_hash = hashlib.md5((track_title+track_artist).encode()).hexdigest()
-    if os.path.isfile(CACHE_FOLDER_LOCATION+song_hash+".txt"):
-        with open(CACHE_FOLDER_LOCATION+song_hash+".txt") as f:
-            lyrics = f.read()
-        return lyrics, True
-    song = genius.search_song(track_title, track_artist)
-    if song == None:
-        return None, False
-    lyrics = f"[{track_title} - {track_artist}]\n\n"+"\n".join(song.lyrics.split("\n")[1:])
-    if os.path.isdir(CACHE_FOLDER_LOCATION) == False:
-        os.mkdir(CACHE_FOLDER_LOCATION)
-    with open(CACHE_FOLDER_LOCATION+song_hash+".txt", "w") as f:
-        f.write(lyrics)
-    return lyrics, True
-
 class Window:
     def __init__(self, root):
         self.window = tk.Toplevel(root)
@@ -110,7 +80,6 @@ class Window:
         self.txt = combo.txt
         self.txt.config(font=(TEXT_FONT_STYLE, TEXT_FONT_SIZE), wrap='word')
         self.txt.config(borderwidth=0, relief="flat")
-        self.txt.insert(tk.INSERT, f"Syncing...")
         self.txt.configure(background=COLOURS_BACKGROUND)
         self.txt.configure(foreground=COLOURS_TEXT)
         self.update_window()
@@ -118,7 +87,6 @@ class Window:
         self.txt.delete('1.0', tk.END)
         self.txt.insert(tk.INSERT, text)
     def show(self):
-        self._set_window_text("Syncing...")
         self.update_window()
         self.window.deiconify()
         self.is_shown = True
@@ -126,7 +94,8 @@ class Window:
         self.window.withdraw()
         self.is_shown = False
     def _update_window(self):
-        track = get_current_track()
+        track = player.get_track_info()
+        print(player.get_track_position())
         if track == None:
             self._set_window_text("No track playing.")
             return
@@ -136,7 +105,11 @@ class Window:
             return
         self._set_window_text("Fetching lyrics...")
         
-        lyrics, res = fetch_lyrics(track_title, track_artist)
+        try:
+            lyrics, res = lyrics_fetcher.fetch_plain(track_title, track_artist)
+        except requests.exceptions.Timeout as e:
+            self._set_window_text("ERROR: Request timed out.\nTry again.")
+            return
         self.last_api_hit = time.time()
         if res == False:
             self._set_window_text("Sorry, lyrics not found.")
