@@ -34,7 +34,7 @@ $ wget -qO- https://git.bugbrekr.dev/bugbrekr/lyric_overlay/archive/v1.8.tar.gz 
 This will setup the configuration file with default settings and will install a systemd unit-service to run on startup.
 
 ## Configuration
-All the configuration options can be found in `config.toml`.
+All the configuration options can be found at `~/.config/lyric_overlay.toml`.
 #### Window
  - `x_offset` and `y-offset` - Initial location of overlay panel on screen
  - `width_percent` and `height_percent` - Size of overlay panel with respect to the screen size

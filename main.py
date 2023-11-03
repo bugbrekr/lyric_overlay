@@ -75,6 +75,7 @@ def get_current_track():
             status=player.Get('org.mpris.MediaPlayer2.Player', 'PlaybackStatus', dbus_interface='org.freedesktop.DBus.Properties')
             if status == "Playing":
                 metadata = player.Get('org.mpris.MediaPlayer2.Player', 'Metadata', dbus_interface='org.freedesktop.DBus.Properties')
+                print(int(player.Get('org.mpris.MediaPlayer2.Player', 'Position', dbus_interface='org.freedesktop.DBus.Properties'))/10e5)
                 return (metadata['xesam:title'], metadata['xesam:artist'][0])
 
 def fetch_lyrics(track_title, track_artist):

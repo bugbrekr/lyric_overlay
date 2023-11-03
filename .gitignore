@@ -2,3 +2,5 @@
 config.toml
 .venv/
 .cache/
+syncedlyrics/__pycache__/
+test*.py
