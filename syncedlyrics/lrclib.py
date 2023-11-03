@@ -6,18 +6,13 @@ class Lrclib(LRCProvider):
     ROOT_URL = "https://lrclib.net"
     API_ENDPOINT = ROOT_URL + "/api"
     SEARCH_ENDPOINT = API_ENDPOINT + "/search"
-    LRC_ENDPOINT = API_ENDPOINT + "/get/"
+    LRC_ENDPOINT = API_ENDPOINT + "/get"
 
     def __init__(self) -> None:
+        self.session.headers.update({
+            "User-Agent": f"LYRIC_OVERLAY v0.x (https://github.com/bugbrekr/lyric_overlay)"
+        })
         super().__init__()
-
-    def get_lrc_by_id(self, track_id: str) -> Optional[str]:
-        url = self.LRC_ENDPOINT + track_id
-        r = requests.get(url)
-        if not r.ok:
-            return
-        track = r.json()
-        return track.get("syncedLyrics", track.get("plainLyrics"))
 
     def get_lrc(self, search_term: str) -> Optional[str]:
         url = self.SEARCH_ENDPOINT
@@ -27,5 +22,4 @@ class Lrclib(LRCProvider):
         tracks = r.json()
         if not tracks:
             return
-        _id = str(tracks[0]["id"])
-        return self.get_lrc_by_id(_id)
+        return tracks[0]['syncedLyrics']

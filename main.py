@@ -17,7 +17,7 @@ with open(os.path.expanduser("~/.config/lyric_overlay.toml")) as f:
 
 mouse = Controller()
 
-lyrics_fetcher = functions.LyricsFetcher(config['api']['genius_api_token'], CACHE_FOLDER_LOCATION+"/lyrics/")
+lyrics_fetcher = functions.LyricsFetcher(config['api']['genius_api_token'], CACHE_FOLDER_LOCATION)
 player = functions.Player()
 
 root = tk.Tk()
@@ -106,10 +106,11 @@ class Window:
         self._set_window_text("Fetching lyrics...")
         
         try:
-            lyrics, res = lyrics_fetcher.fetch_plain(track_title, track_artist)
+            lyrics_data, res = lyrics_fetcher.fetch_synced(track_title, track_artist)
         except requests.exceptions.Timeout as e:
             self._set_window_text("ERROR: Request timed out.\nTry again.")
             return
+        lyrics = lyrics_data['synced_lyrics']
         self.last_api_hit = time.time()
         if res == False:
             self._set_window_text("Sorry, lyrics not found.")

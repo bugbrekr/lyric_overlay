@@ -31,7 +31,7 @@ class Musixmatch(LRCProvider):
         return response
 
     def _get_token(self, cache_location):
-        token_path = cache_location
+        token_path = cache_location+"musixmatch.token"
         current_time = int(time.time())
         if os.path.exists(token_path):
             with open(token_path, "r") as token_file:
