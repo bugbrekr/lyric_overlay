@@ -7,7 +7,7 @@ import os
 class Musixmatch(LRCProvider):
     ROOT_URL = "https://apic-desktop.musixmatch.com/ws/1.1/"
 
-    def __init__(self) -> None:
+    def __init__(self, cache_location) -> None:
         super().__init__()
         self.token = None
         self.session.headers.update(
@@ -16,10 +16,11 @@ class Musixmatch(LRCProvider):
                 "cookie": "AWSELBCORS=0; AWSELB=0",
             }
         )
+        self.cache_location = cache_location
 
     def _get(self, action: str, query: List[tuple]):
         if action != "token.get" and self.token is None:
-            self._get_token()
+            self._get_token(self.cache_location)
         query.append(("app_id", "web-desktop-app-v1.0"))
         if self.token is not None:
             query.append(("usertoken", self.token))
@@ -43,7 +44,7 @@ class Musixmatch(LRCProvider):
         d = self._get("token.get", [("user_language", "en")]).json()
         if d["message"]["header"]["status_code"] == 401:
             time.sleep(10)
-            return self._get_token()
+            return self._get_token(cache_location)
         new_token = d["message"]["body"]["user_token"]
         expiration_time = current_time + 604800  # 7 days expiration
         # Cache the new token

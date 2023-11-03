@@ -3,8 +3,15 @@
 from typing import Optional
 from bs4 import SoupStrainer
 from .base import LRCProvider
-from ..utils import generate_bs4_soup
+from bs4 import BeautifulSoup, FeatureNotFound
 
+def generate_bs4_soup(session, url: str, **kwargs):
+    r = session.get(url)
+    try:
+        soup = BeautifulSoup(r.text, features="lxml", **kwargs)
+    except FeatureNotFound:
+        soup = BeautifulSoup(r.text, features="html.parser", **kwargs)
+    return soup
 
 class Megalobiz(LRCProvider):
     """Megabolz provider class"""
