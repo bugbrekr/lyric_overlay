@@ -4,6 +4,7 @@ import os
 from lyricsgenius import Genius
 import syncedlyrics
 import json
+import re
 
 class Player:
     def __init__(self):
@@ -21,12 +22,16 @@ class Player:
     def get_track_info(self, player=None):
         if player == None:
             player = self._get_playing_player()
+        if player == None:
+            return None
         metadata = self._get(player, "Metadata")
         return (metadata['xesam:title'], metadata['xesam:artist'][0])
 
     def get_track_position(self, player=None):
         if player == None:
             player = self._get_playing_player()
+        if player == None:
+            return None
         position = int(self._get(player, "Position"))/10e5
         return round(position, 2)
 
@@ -98,3 +103,44 @@ class LyricsFetcher:
                            }
         self._cache_lyrics(self._hash_track(track_title, track_artist), lyrics_data)
         return lyrics_data, True
+
+class SyncedLyrics:
+    def __init__(self, raw_lyrics):
+        self._raw_lyrics = raw_lyrics
+        self._parse_lyrics(self._raw_lyrics)
+    def _extract_parts(self, raw_lyric):
+        lyric = raw_lyric[11:]
+        if not (raw_lyric[0] == '[' and raw_lyric[9] == ']' and raw_lyric[10] == ' '):
+            return False, lyric
+        _timest = raw_lyric[1:9]
+        try:
+            timest = (int(_timest[:2])*60)+float(_timest[3:])
+        except ValueError:
+            return False, lyric
+        return round(timest, 2), lyric
+    def _parse_lyrics(self, raw_lyrics):
+        raw_lyrics_list = raw_lyrics.split("\n")
+        self.lyrics_list = []
+        self.timest_list = []
+        _timest = 0.0
+        for raw_lyric in raw_lyrics_list:
+            _r = re.findall("\[\d\d:\d\d.\d\d\]", raw_lyric)
+            if not _r:
+                self.timest_list.append(_timest)
+                self.lyrics_list.append(raw_lyric)
+            __timest, lyric = self._extract_parts(raw_lyric)
+            if __timest == False:
+                __timest = _timest
+            self.timest_list.append(__timest)
+            self.lyrics_list.append(lyric)
+            _timest = __timest
+
+    def get_current_lyric_index(self, position):
+        for i, timest in enumerate(self.timest_list):
+            if position < timest:
+                continue
+            elif i == len(self.timest_list)-1:
+                return i, round(timest-position, 2)
+            elif position < self.timest_list[i+1]:
+                return i, round(timest-position, 2)
+        return 0, round(self.timest_list[0]-position, 2)
