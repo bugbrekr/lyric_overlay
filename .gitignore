@@ -1,6 +1,6 @@
-.spotify_token
 config.toml
 .venv/
 .cache/
-syncedlyrics/__pycache__/
+*/__pycache__/
+*/*/__pycache__/
 test*.py

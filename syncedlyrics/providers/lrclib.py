@@ -1,10 +1,8 @@
 from typing import Optional
 from .base import LRCProvider
-
+import requests
 
 class Lrclib(LRCProvider):
-    """Lrclib LRC provider class"""
-
     ROOT_URL = "https://lrclib.net"
     API_ENDPOINT = ROOT_URL + "/api"
     SEARCH_ENDPOINT = API_ENDPOINT + "/search"
@@ -15,7 +13,7 @@ class Lrclib(LRCProvider):
 
     def get_lrc_by_id(self, track_id: str) -> Optional[str]:
         url = self.LRC_ENDPOINT + track_id
-        r = self.session.get(url)
+        r = requests.get(url)
         if not r.ok:
             return
         track = r.json()
@@ -23,7 +21,7 @@ class Lrclib(LRCProvider):
 
     def get_lrc(self, search_term: str) -> Optional[str]:
         url = self.SEARCH_ENDPOINT
-        r = self.session.get(url, params={"q": search_term})
+        r = requests.get(url, params={"q": search_term})
         if not r.ok:
             return
         tracks = r.json()

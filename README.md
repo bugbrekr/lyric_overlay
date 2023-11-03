@@ -13,7 +13,7 @@ Built for Linux. Tested on Ubuntu (Xfce).
  - **Tkinter**: A good GUI framework.
 
 ## Compatibility
-Built and tested only for Debian based systems including Ubuntu.
+Built and tested for Debian based systems only, including Ubuntu.
 The installer uses `systemd`.
 
 ## Installation

@@ -2,12 +2,9 @@ import threading
 import tkinter as tk
 import tkinter.ttk as ttk
 import toml
-import random, string
 from pynput import keyboard
 from pynput.mouse import Controller
 import time
-# import spotipy
-# from spotipy.oauth2 import SpotifyOAuth, CacheFileHandler
 from lyricsgenius import Genius
 import hashlib
 import dbus
@@ -21,19 +18,10 @@ CACHE_FOLDER_LOCATION = os.path.expanduser("~/.cache/lyric_overlay/")
 with open(os.path.expanduser("~/.config/lyric_overlay.toml")) as f:
     config = toml.loads(f.read())
 
-# sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
-#     client_id=config['api']['spotify_client_id'],
-#     client_secret=config['api']['spotify_client_secret'],
-#     redirect_uri=config['api']['spotify_redirect_uri'],
-#     scope="user-read-currently-playing",
-#     cache_handler=CacheFileHandler(cache_path=".spotify_token")))
 genius = Genius(config['api']['genius_api_token'])
 genius.verbose = False
 
 bus = dbus.SessionBus()
-
-# user = sp.current_user()
-# USER_NAME = user['display_name']
 
 root = tk.Tk()
 root.withdraw()
@@ -138,12 +126,6 @@ class Window:
         self.window.withdraw()
         self.is_shown = False
     def _update_window(self):
-        # current_track = sp.current_user_playing_track()
-        # track_title = current_track['item']['name']
-        # track_artist = current_track['item']['artists'][0]['name']
-        # if current_track == None:
-        #     self._set_window_text("No track playing.")
-        #     return
         track = get_current_track()
         if track == None:
             self._set_window_text("No track playing.")
