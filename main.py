@@ -44,7 +44,7 @@ WINDOW_HEIGHT = int(SCREEN_HEIGHT*WINDOW_HEIGHT_FRACTION)
 WINDOW_GEOMETRY = f"{WINDOW_WIDTH}x{WINDOW_HEIGHT}{WINDOW_X_OFFSET:+}{WINDOW_Y_OFFSET:+}"
 
 style = ttk.Style(root)
-style.configure('Text.TFrame', background="black", foreground="black")
+style.configure('Text.TFrame', background=COLOURS_BACKGROUND, foreground=COLOURS_BACKGROUND)
 
 style.layout('arrowless.Vertical.TScrollbar', 
          [('Vertical.Scrollbar.trough',
@@ -103,18 +103,19 @@ class Window:
         if time.time()-self.last_api_hit < 1:
             self._set_window_text("Slow down! Try again in a second.")
             return
-        self._set_window_text("Fetching lyrics...")
+        self._set_window_text("Searching for lyrics...")
         
         try:
+            self.last_api_hit = time.time()
             lyrics_data, res = lyrics_fetcher.fetch_synced(track_title, track_artist)
         except requests.exceptions.Timeout as e:
             self._set_window_text("ERROR: Request timed out.\nTry again.")
             return
-        lyrics = lyrics_data['synced_lyrics']
-        self.last_api_hit = time.time()
+
         if res == False:
             self._set_window_text("Sorry, lyrics not found.")
             return
+        lyrics = lyrics_data['synced_lyrics']
         self._set_window_text(lyrics)
     def update_window(self):
         threading.Thread(target=self._update_window).start()

@@ -67,10 +67,10 @@ class LyricsFetcher:
             return None, False
         lyrics = f"[{track_title} - {track_artist}]\n\n"+"\n".join(track.lyrics.split("\n")[1:])
         lyrics_data = {
+                               "source": "Genius",
                                "track_title": track_title,
                                "track_artist": track_artist,
-                               "plain_lyrics": lyrics,
-                               "source": "Genius"
+                               "plain_lyrics": lyrics
                            }
         self._cache_lyrics(self._hash_track(track_title, track_artist), lyrics_data)
         return lyrics_data, True
@@ -84,7 +84,6 @@ class LyricsFetcher:
         _providers = [
             syncedlyrics.Lrclib(), 
             syncedlyrics.Musixmatch(self.cache_folder),
-            syncedlyrics.Megalobiz(),
             syncedlyrics.NetEase()]
         lrc = None
         for provider in _providers:
@@ -94,12 +93,13 @@ class LyricsFetcher:
             if ("[" in lrc and "]" in lrc):
                 break
         if not lrc:
+            print("not found")
             return None, False
         lyrics_data = {
+                               "source": provider.__class__.__name__,
                                "track_title": track_title,
                                "track_artist": track_artist,
-                               "synced_lyrics": lrc,
-                               "source": provider.__class__.__name__
+                               "synced_lyrics": lrc
                            }
         self._cache_lyrics(self._hash_track(track_title, track_artist), lyrics_data)
         return lyrics_data, True
@@ -108,11 +108,12 @@ class SyncedLyrics:
     def __init__(self, raw_lyrics):
         self._raw_lyrics = raw_lyrics
         self._parse_lyrics(self._raw_lyrics)
-    def _extract_parts(self, raw_lyric):
-        lyric = raw_lyric[11:]
-        if not (raw_lyric[0] == '[' and raw_lyric[9] == ']' and raw_lyric[10] == ' '):
-            return False, lyric
-        _timest = raw_lyric[1:9]
+    def _extract_parts(self, raw_lyric, decimal_precision=2):
+        if raw_lyric[8+decimal_precision] == ' ':
+            lyric = raw_lyric[9+decimal_precision:]
+        else:
+            lyric = raw_lyric[8+decimal_precision:]
+        _timest = raw_lyric[1:7+decimal_precision]
         try:
             timest = (int(_timest[:2])*60)+float(_timest[3:])
         except ValueError:
@@ -125,10 +126,15 @@ class SyncedLyrics:
         _timest = 0.0
         for raw_lyric in raw_lyrics_list:
             _r = re.findall("\[\d\d:\d\d.\d\d\]", raw_lyric)
-            if not _r:
-                self.timest_list.append(_timest)
-                self.lyrics_list.append(raw_lyric)
-            __timest, lyric = self._extract_parts(raw_lyric)
+            if _r:
+                __timest, lyric = self._extract_parts(raw_lyric)
+            else:
+                _r = re.findall("\[\d\d:\d\d.\d\d\d\]", raw_lyric)
+                if _r:
+                    __timest, lyric = self._extract_parts(raw_lyric, 3)
+                else:
+                    self.timest_list.append(_timest)
+                    self.lyrics_list.append(raw_lyric)
             if __timest == False:
                 __timest = _timest
             self.timest_list.append(__timest)
