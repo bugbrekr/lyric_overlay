@@ -61,6 +61,7 @@ class Window:
         self.window.attributes("-alpha", WINDOW_OPACITY)
         self.window.config(background=COLOURS_BACKGROUND)
         self.is_shown = False
+        self.status = 'idle'
         self.movable = False
         self.last_api_hit = 0
     def init(self):
@@ -73,20 +74,32 @@ class Window:
         self.is_shown = True
         self.window.bind("<ButtonPress-1>", self.on_mv_down)
         self.window.bind("<ButtonRelease-1>", self.on_mv_up)
+        threading.Thread(target=self._background_loop).start()
         self.window.mainloop()
     def _init_window(self):
-        self.txt = tk.Text(self.window, wrap='word')
-        self.txt.grid(row=0, column=0, sticky="nsew", padx=2, pady=1)
-        self.txt.config(font=(TEXT_FONT_STYLE, TEXT_FONT_SIZE), background=COLOURS_BACKGROUND, foreground=COLOURS_TEXT)
+        # self.txt = tk.Text(self.window, wrap='word')
+        # self.txt.grid(row=0, column=0, sticky="nsew", padx=2, pady=1)
+        # self.txt.config(font=(TEXT_FONT_STYLE, TEXT_FONT_SIZE), background=COLOURS_BACKGROUND, foreground=COLOURS_TEXT)
         self.window.grid_rowconfigure(0, weight=1)
         self.window.grid_columnconfigure(0, weight=1)
+        # self.container = tk.Frame(self.window)
+        # self.container.config(background=COLOURS_BACKGROUND, borderwidth=0, highlightthickness=0)
+        # self.container.pack(fill='both', expand=True)
+        # self._txt_list = []
 
-        self.update_window()
-    def _set_window_text(self, text):
-        self.txt.delete('1.0', tk.END)
-        self.txt.insert(tk.INSERT, text)
+        # self.txt = tk.Text(self.container, wrap='word', pady=10)
+        # self.txt.config(font=(TEXT_FONT_STYLE, TEXT_FONT_SIZE), background=COLOURS_BACKGROUND, foreground=COLOURS_TEXT)
+        # self.txt.pack(fill='both', expand=True)
+        
+        self.window.after(10, self.update_window)
+    def _set_info(self, text):
+        pass
+    def _set_error(self, error):
+        pass
+    def _set_lyrics(self, lyrics):
+        pass
+
     def show(self):
-        self.update_window()
         self.window.deiconify()
         self.is_shown = True
     def hide(self):
@@ -95,29 +108,53 @@ class Window:
     def _update_window(self):
         track = player.get_track_info()
         if track == None:
-            self._set_window_text("No track playing.")
+            self._set_info("No track playing.")
+            self.status = 'notplaying'
             return
         track_title, track_artist = track
         if time.time()-self.last_api_hit < 1:
-            self._set_window_text("Slow down! Try again in a second.")
+            self._set_error("Slow down! Try again in a second.")
+            self.status = 'idle'
             return
-        self._set_window_text("Searching for lyrics...")
         
+        self.status = 'fetching'
+        self._set_info("Searching for lyrics...")
+
         try:
             self.last_api_hit = time.time()
-            lyrics_data, res = lyrics_fetcher.fetch_synced(track_title, track_artist)
+            self.lyrics_data, res = lyrics_fetcher.fetch_synced(track_title, track_artist)
         except requests.exceptions.Timeout as e:
-            self._set_window_text("ERROR: Request timed out.\nTry again.")
+            self._set_error("ERROR: Request timed out.\nTry again.")
+            self.status = 'idle'
             return
 
         if res == False:
-            self._set_window_text("Sorry, lyrics not found.")
+            self._set_error("Sorry, lyrics not found.")
+            self.status = 'idle'
             return
-        lyrics = lyrics_data['synced_lyrics']
-        self._set_window_text(lyrics)
-        self.txt.yview("scroll", 5, "units")
+        self.lyrics = functions.SyncedLyrics(self.lyrics_data['synced_lyrics'])
+        self._set_lyrics(self.lyrics.get_plain_lyrics())
+        self.status = 'ready'
     def update_window(self):
         threading.Thread(target=self._update_window).start()
+    def _scroll_to_line(self, total_lines, line):
+        pass
+    def _background_loop(self):
+        track_info = player.get_track_info()
+        while True:
+            if self.is_shown:
+                if track_info != player.get_track_info():
+                        time.sleep(0.5)
+                        self._update_window()
+                track_info = player.get_track_info()
+                if self.status == 'ready':
+                    pos = player.get_track_position()
+                    if pos == None:
+                        self.status = 'notplaying'
+                        self._update_window()
+                    line, delta = self.lyrics.get_current_lyric_index(pos)
+                    self._scroll_to_line(len(self.lyrics.timest_list), line)
+            time.sleep(0.5)
     def on_hotkey(self):
         if self.is_shown:
             self.hide()

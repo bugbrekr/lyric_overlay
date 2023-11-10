@@ -25,7 +25,7 @@ class Player:
         if player == None:
             return None
         metadata = self._get(player, "Metadata")
-        return (metadata['xesam:title'], metadata['xesam:artist'][0])
+        return (str(metadata['xesam:title']), str(metadata['xesam:artist'][0]))
 
     def get_track_position(self, player=None):
         if player == None:
@@ -93,7 +93,6 @@ class LyricsFetcher:
             if ("[" in lrc and "]" in lrc):
                 break
         if not lrc:
-            print("not found")
             return None, False
         lyrics_data = {
                                "source": provider.__class__.__name__,
@@ -109,10 +108,13 @@ class SyncedLyrics:
         self._raw_lyrics = raw_lyrics
         self._parse_lyrics(self._raw_lyrics)
     def _extract_parts(self, raw_lyric, decimal_precision=2):
-        if raw_lyric[8+decimal_precision] == ' ':
-            lyric = raw_lyric[9+decimal_precision:]
+        if len(raw_lyric) == 8+decimal_precision:
+            lyric = ""
         else:
-            lyric = raw_lyric[8+decimal_precision:]
+            if raw_lyric[8+decimal_precision] == ' ':
+                lyric = raw_lyric[9+decimal_precision:]
+            else:
+                lyric = raw_lyric[8+decimal_precision:]
         _timest = raw_lyric[1:7+decimal_precision]
         try:
             timest = (int(_timest[:2])*60)+float(_timest[3:])
@@ -120,7 +122,7 @@ class SyncedLyrics:
             return False, lyric
         return round(timest, 2), lyric
     def _parse_lyrics(self, raw_lyrics):
-        raw_lyrics_list = raw_lyrics.split("\n")
+        raw_lyrics_list = raw_lyrics.strip().split("\n")
         self.lyrics_list = []
         self.timest_list = []
         _timest = 0.0
@@ -140,6 +142,7 @@ class SyncedLyrics:
             self.timest_list.append(__timest)
             self.lyrics_list.append(lyric)
             _timest = __timest
+        self.plain_lyrics = "\n".join(self.lyrics_list)
 
     def get_current_lyric_index(self, position):
         for i, timest in enumerate(self.timest_list):
@@ -150,3 +153,6 @@ class SyncedLyrics:
             elif position < self.timest_list[i+1]:
                 return i, round(timest-position, 2)
         return 0, round(self.timest_list[0]-position, 2)
+    
+    def get_plain_lyrics(self):
+        return self.plain_lyrics
