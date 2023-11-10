@@ -1,7 +1,7 @@
 import dbus
 import hashlib
 import os
-from lyricsgenius import Genius
+# from lyricsgenius import Genius
 import syncedlyrics
 import json
 import re
@@ -36,9 +36,9 @@ class Player:
         return round(position, 2)
 
 class LyricsFetcher:
-    def __init__(self, genius_api_token, cache_folder):
-        self.genius = Genius(genius_api_token)
-        self.genius.verbose = False
+    def __init__(self, cache_folder):
+        # self.genius = Genius("deprecated_token")
+        # self.genius.verbose = False
         self.cache_folder = cache_folder
     def _hash_track(self, track_title, track_artist):
         return hashlib.md5((track_title+track_artist).encode()).hexdigest()
@@ -57,23 +57,23 @@ class LyricsFetcher:
         with open(cache_location+track_hash+".json", "w") as f:
             f.write(json.dumps(data))
 
-    def fetch_plain(self, track_title, track_artist):
-        lyrics = self._get_from_cache(self._hash_track(track_title, track_artist))
-        if lyrics:
-            if lyrics.get('plain_lyrics'):
-                return lyrics, True
-        track = self.genius.search_song(track_title, track_artist)
-        if track == None:
-            return None, False
-        lyrics = f"[{track_title} - {track_artist}]\n\n"+"\n".join(track.lyrics.split("\n")[1:])
-        lyrics_data = {
-                               "source": "Genius",
-                               "track_title": track_title,
-                               "track_artist": track_artist,
-                               "plain_lyrics": lyrics
-                           }
-        self._cache_lyrics(self._hash_track(track_title, track_artist), lyrics_data)
-        return lyrics_data, True
+    # def fetch_plain(self, track_title, track_artist):
+    #     lyrics = self._get_from_cache(self._hash_track(track_title, track_artist))
+    #     if lyrics:
+    #         if lyrics.get('plain_lyrics'):
+    #             return lyrics, True
+    #     track = self.genius.search_song(track_title, track_artist)
+    #     if track == None:
+    #         return None, False
+    #     lyrics = f"[{track_title} - {track_artist}]\n\n"+"\n".join(track.lyrics.split("\n")[1:])
+    #     lyrics_data = {
+    #                            "source": "Genius",
+    #                            "track_title": track_title,
+    #                            "track_artist": track_artist,
+    #                            "plain_lyrics": lyrics
+    #                        }
+    #     self._cache_lyrics(self._hash_track(track_title, track_artist), lyrics_data)
+    #     return lyrics_data, True
 
     def fetch_synced(self, track_title, track_artist):
         lyrics = self._get_from_cache(self._hash_track(track_title, track_artist))

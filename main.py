@@ -17,7 +17,7 @@ with open(os.path.expanduser("~/.config/lyric_overlay.toml")) as f:
 
 mouse = Controller()
 
-lyrics_fetcher = functions.LyricsFetcher(config['api']['genius_api_token'], CACHE_FOLDER_LOCATION)
+lyrics_fetcher = functions.LyricsFetcher(CACHE_FOLDER_LOCATION)
 player = functions.Player()
 
 root = tk.Tk()
@@ -59,6 +59,7 @@ class Window:
         self.window.geometry(WINDOW_GEOMETRY)
         self.window.attributes('-type', 'dock')
         self.window.attributes("-alpha", WINDOW_OPACITY)
+        self.window.config(background=COLOURS_BACKGROUND)
         self.is_shown = False
         self.movable = False
         self.last_api_hit = 0
@@ -74,14 +75,12 @@ class Window:
         self.window.bind("<ButtonRelease-1>", self.on_mv_up)
         self.window.mainloop()
     def _init_window(self):
-        combo = TextScrollCombo(self.window)
-        combo.config(style="Text.TFrame")
-        combo.pack(fill="both", expand=True)
-        self.txt = combo.txt
-        self.txt.config(font=(TEXT_FONT_STYLE, TEXT_FONT_SIZE), wrap='word')
-        self.txt.config(borderwidth=0, relief="flat")
-        self.txt.configure(background=COLOURS_BACKGROUND)
-        self.txt.configure(foreground=COLOURS_TEXT)
+        self.txt = tk.Text(self.window, wrap='word')
+        self.txt.grid(row=0, column=0, sticky="nsew", padx=2, pady=1)
+        self.txt.config(font=(TEXT_FONT_STYLE, TEXT_FONT_SIZE), background=COLOURS_BACKGROUND, foreground=COLOURS_TEXT)
+        self.window.grid_rowconfigure(0, weight=1)
+        self.window.grid_columnconfigure(0, weight=1)
+
         self.update_window()
     def _set_window_text(self, text):
         self.txt.delete('1.0', tk.END)
@@ -95,7 +94,6 @@ class Window:
         self.is_shown = False
     def _update_window(self):
         track = player.get_track_info()
-        print(player.get_track_position())
         if track == None:
             self._set_window_text("No track playing.")
             return
@@ -117,6 +115,7 @@ class Window:
             return
         lyrics = lyrics_data['synced_lyrics']
         self._set_window_text(lyrics)
+        self.txt.yview("scroll", 5, "units")
     def update_window(self):
         threading.Thread(target=self._update_window).start()
     def on_hotkey(self):
@@ -146,21 +145,5 @@ class Window:
     def on_mv_up(self, event):
         self.movable = False
 
-class TextScrollCombo(ttk.Frame):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.grid_propagate(False)
-        self.grid_rowconfigure(0, weight=1)
-        self.grid_columnconfigure(0, weight=1)
-        self.txt = tk.Text(self)
-        self.txt.grid(row=0, column=0, sticky="nsew", padx=2, pady=1)
-        scrollb = ttk.Scrollbar(self, command=self.txt.yview, style='arrowless.Vertical.TScrollbar')
-        scrollb.grid(row=0, column=1, sticky='nsew')
-        self.txt['yscrollcommand'] = scrollb.set
-
 window_controller = Window(root)
-win = window_controller.window
-
-win.config(background=COLOURS_BACKGROUND)
-
 window_controller.init()
